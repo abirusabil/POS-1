@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\cart;
+use App\Models\Customer;
+use App\Models\Discount;
 use App\Models\Expense;
 use App\Models\Product;
+use App\Models\Transaction;
 use Automattic\WooCommerce\Client;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,16 +16,107 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-//    public function expense (){
-//        return view('dashboard.home');
-//
-//    }
+    public function transaction(){
+        // $woocommerce = $this->woocommerce();
+        // // dd($woocommerce->get('customers'));
+        // dd($woocommerce->delete('customers/6', ['force' => true]));
+        $data = Transaction::with(['customers','carts'])->orderBy('created_at','desc')->get();
+
+        // dd($data);
+        view()->share([
+            'data' => $data
+        ]);
+
+        return view('dashboard.transaction');
+    }
+    public function deleteCart($id){
+        $data = cart::find($id);
+
+        $data->delete();
+
+        return redirect()->back();
+    }
+    public function printLabel($type,$id){
+        return view('dashboard.printLabel');
+
+    }
+
     public function showCustomer (){
         dd($this->customer());
     }
 
-    public function printInvoice (){
+    public function hold (Request $request){
+
+        $cartss = $this->cart();
+
+        $tmp = [];
+        $i = 0;
+
+        $customer_id = '';
+        $data = new Transaction();
+        foreach ($cartss as $crt ){
+            $crt->status = '0';
+            $crt->customer_id = $request->customer_id;
+
+            $customer_id = $request->customer_id;
+            $crt->save();
+        }
+
+        $data->customer_id = $customer_id;
+        $data->customer_id = $customer_id;
+
+        return response()->json([
+            'status' => 'success'
+        ]);
+    }
+
+    public function printInvoice ($id){
+        $data = Transaction::with(['customers'])->whereId($id)->first();
+
+        $carts = cart::where('transaction_id','=',$id)->get();
+
+        $tmp = 0;
+        foreach ($carts as $a){
+            $tmp = $tmp + $a->subTotal;
+        }
+
+        view()->share([
+            'carts' => $carts,
+            'data' => $data,
+            'total' => $tmp
+        ]);
         return view('dashboard.printInvoice');
+    }
+
+    public function printShipping ($id){
+
+//        dd('dqw');
+
+        $data = Transaction::with(['customers'])->whereId($id)->first();
+        $woocommerce = $this->woocommerce();
+
+        $customer =$woocommerce->get('customers/'.$data->customer_id);
+
+        $shipping = (array) $customer->shipping;
+//        dd($shipping['address_1']);
+        $carts = cart::where('transaction_id','=',$id)->get();
+
+        $cs = Customer::where('customer_id','=',$data->customer_id)->first();
+
+//        dd($cs);
+        $tmp = 0;
+        foreach ($carts as $a){
+            $tmp = $tmp + $a->subTotal;
+        }
+
+        view()->share([
+            'carts' => $carts,
+            'data' => $data,
+            'total' => $tmp,
+            'shipping' => $shipping['address_1'],
+            'cs' => $cs
+        ]);
+        return view('dashboard.printShipping');
 
     }
 
@@ -39,9 +133,6 @@ class HomeController extends Controller
 
         $customer =$woocommerce->get('customers/'.$request->customer_id);
 
-//        return response()->json([
-//            'data' => $customer->billing->first_name
-//        ]);
         $carts = $this->cart();
 
         $tmp = [];
@@ -62,11 +153,6 @@ class HomeController extends Controller
             }
 
         }
-
-//
-//        return response()->json([
-//            'data' => $tmp
-//        ]);
 
         $data = [
             'payment_method' => 'cash',
@@ -98,6 +184,13 @@ class HomeController extends Controller
 
         $order = $woocommerce->post('orders', $data);
 
+        $transaction = new Transaction();
+        $transaction->customer_id = $request->customer_id;
+        $transaction->order = $order->id;
+        $transaction->amount_pay = $request->amount_pay;
+        $transaction->note_pay = $request->note_pay;
+        $transaction->hold = 'no';
+        $transaction->save();
 
         $cartss = $this->cart();
 
@@ -105,9 +198,12 @@ class HomeController extends Controller
         $i = 0;
         foreach ($cartss as $crt ){
             $crt->status = '1';
+            $crt->transaction_id = $transaction->id;
 
             $crt->save();
         }
+
+
 
 
         return response()->json([
@@ -119,8 +215,11 @@ class HomeController extends Controller
 
     public function createCustomer(Request $request){
 
+//        dd($request->customer_discount);
+
         $PecahStr = explode(" ", $request->customer_name);
 
+        $as = $request->customer_name;
         $frist = $PecahStr[0];
 
         unset($PecahStr[0]);
@@ -151,7 +250,18 @@ class HomeController extends Controller
             ]
         ];
 
-        $woocommerce->post('customers', $data);
+
+
+        $customer = $woocommerce->post('customers', $data);
+
+
+        $cs = new Customer();
+        $cs->customer_id = $customer->id;
+        $cs->name = $as;
+        $cs->discount = $request->customer_discount;
+        $cs->customer_track = $request->customer_track;
+
+        $cs->save();
 
         return redirect()->back();
 
@@ -180,7 +290,7 @@ class HomeController extends Controller
     }
 
     public function actionCart($name,$price,$product_id,$variant_id = ''){
-//        dd($price);
+
 
         $data = new cart();
 
@@ -226,12 +336,16 @@ class HomeController extends Controller
 
         // dd($array);
         //        dd($data);
+
+        $discount = Discount::all();
+
         view()->share([
             'products' => $array,
             'carts' => $this->cart(),
             'count' => count($this->cart()),
             'total' => $this->total(),
-            'customers' => $this->customer()
+            'customers' => $this->customer(),
+            'discount' => $discount
         ]);
 
         return view('dashboard.pos');
@@ -262,6 +376,7 @@ class HomeController extends Controller
             'query' => $request->query(),
         ]);
 
+        $discount = Discount::all();
         // dd($array);
         //        dd($data);
         view()->share([
@@ -269,12 +384,56 @@ class HomeController extends Controller
             'carts' => $this->cart(),
             'count' => count($this->cart()),
             'total' => $this->total(),
-            'customers' => $this->customer()
+            'customers' => $this->customer(),
+            'discount' => $discount
+
         ]);
 
         return view('dashboard.pos');
     }
 
+    public function holdView ($customer_id,Request $request){
+        if ($request->page == null || $request->page == '') {
+            $page = '1';
+        } else {
+            $page = $request->page;
+        }
+
+        $woocommerce = $this->woocommerce();
+
+        $array = $woocommerce->get('products?page=' . $page);
+
+        $a = $woocommerce->http->getResponse();
+        $headers = $a->getHeaders();
+        $totalPages = $headers['x-wp-totalpages'];
+        $total = $headers['x-wp-total'];
+        // $current_page = '1';
+
+        $array = new Paginator($array, $total, '10', $page, [
+            'path' => $request->url(),
+            'query' => $request->query(),
+        ]);
+
+        // dd($array);
+        //        dd($data);
+
+        $carts = cart::whereStatus('0')->whereCustomerId($customer_id)->get();
+
+        $discount = Discount::all();
+        view()->share([
+            'products' => $array,
+            'carts' => $carts,
+            'count' => count($this->cart()),
+            'total' => $this->total(),
+            'customers' => $this->customer(),
+            'discount' => $discount
+
+        ]);
+
+
+        return view('dashboard.pos');
+
+    }
     public function posVariable ($id,Request $request){
         if ($request->page == null || $request->page == '') {
             $page = '1';
@@ -301,13 +460,16 @@ class HomeController extends Controller
         $get = $woocommerce->get('products/'.$id);
         // dd($array);
         //        dd($data);
+        $discount = Discount::all();
         view()->share([
             'products' => $array,
             'get' => $get,
             'carts' => $this->cart(),
             'count' => count($this->cart()),
             'total' => $this->total(),
-            'customers' => $this->customer()
+            'customers' => $this->customer(),
+            'discount' => $discount
+
         ]);
 
 
@@ -676,4 +838,17 @@ class HomeController extends Controller
         dd($woocommerce->post('orders', $data));
 
     }
+
+    public function getDiscount(Request $request){
+        $data = Customer::whereCustomerId($request->customer_id)->first();
+        $discount = 0;
+        if ($data != null){
+            $discount = (int) $data->discount;
+        }
+
+        return response()->json([
+            'discount' => $discount
+        ]);
+    }
+
 }

@@ -23,6 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->register();
+
+        \Gate::define('admin', function ($user) {
+            if ($user->level == 'admin') {
+                return true;
+            }
+            return false;
+        });
     }
 }

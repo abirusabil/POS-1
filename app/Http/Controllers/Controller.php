@@ -13,7 +13,34 @@ use Illuminate\Support\Facades\Auth;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    
+    public function convertUSD(){
+        $curl = curl_init();
 
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://api.apilayer.com/exchangerates_data/convert?to=IDR&from=USD&amount=1",
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: text/plain",
+                "apikey: Wyqd8y0I4scpYFzwbHlYZuzZSyfChT6n"
+            ),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET"
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $bv = json_decode($response);
+//        dd($bv->result);
+        return $bv->result;
+    }
+    
     public function woocommerce()
     {
         $woocommerce = new Client(
@@ -29,7 +56,9 @@ class Controller extends BaseController
     }
 
     public function cart(){
-        $data = cart::whereStatus('0')->get();
+        // $data = cart::whereStatus('0')->where('customer_id','=',null)->get();
+        $data = cart::whereStatus('0')->where('user_id' , Auth::user()->id)->get();
+
 
         return $data;
     }

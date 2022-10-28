@@ -11,8 +11,9 @@
 
 @section('content')
     <section class="content">
-        <form action="{{route('products.store')}}" method="post" enctype="multipart/form-data">
+        <form action="{{(($data != null) ? route('products.update',$data->id) : route('products.store'))}}" method="post" enctype="multipart/form-data">
             @csrf
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-primary">
@@ -30,26 +31,30 @@
                             <div class="col-md-6">
 
                                 <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="inputStatus">Type</label>
-                                        <select name="type" class="form-control custom-select" name="drpDown" id="drpDown">
-                                            <option value="1">Single product</option>
-                                            <option value="2">Variable product</option>
-                                        </select>
-                                    </div>
+                                    @if($data == null)
+                                        <div class="form-group">
+                                            <label for="inputStatus">Type</label>
+                                            <select name="type" class="form-control custom-select" name="drpDown" id="drpDown" readonly>
+                                                <option value="1">Single product</option>
+                                                <option value="2">Variable product</option>
+                                            </select>
+                                        </div>
+                                    @endif
+
                                     <div class="form-group">
                                         <label for="inputName">Image</label>
                                         {{--                            <input>--}}
-                                        <input type="file" name="image" id="inputName" class="form-control">
+                                        <input type="file" name="image[]" multiple="multiple" id="inputName" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">Name</label>
-                                        <input type="text" name="name" id="inputName" class="form-control">
+                                        <input type="text" name="name" id="inputName" value="{{($data != null) ? $data->name : ''}}" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">Code</label>
                                         <input type="text" name="code" id="inputName" class="form-control">
                                     </div>
+
 
                                     {{--                        <div class="form-group">--}}
                                     {{--                            <label for="inputStatus">Status</label>--}}
@@ -70,77 +75,38 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">price modal</label>
-                                        <input type="text" name="price_modal" id="inputName" class="form-control">
-                                    </div> <div class="form-group">
+                                        <input type="text" name="price_modal" value="{{($data != null) ? $sql->price_modal : ''}}" id="inputName" class="form-control">
+                                    </div>
+                                        <div class="form-group">
                                         <label for="inputName">price sale</label>
-                                        <input type="text" name="price" id="inputName" class="form-control">
+                                        <input type="text" name="price" value="{{($data != null) ? $data->regular_price : ''}} " id="inputName" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="inputStatus">Categories</label>
                                         <select id="inputStatus" name="category" class="form-control custom-select">
-                                            {{--                                <option selected disabled>Select one</option>--}}
+                                            <option value="{{($data != null) ? $data->categories[0]->id : ''}}">{{($data != null) ? $data->categories[0]->name : ''}}</option>
+
                                             @foreach($categories as $category)
-                                                <option value="{{$category->id}}">{{$category->name}}</option>
+                                                <option value="{{$category->id}}" >{{$category->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputStatus">Description</label>
                                         <textarea id="summernote" name="dsc">
-                                    Place <em>some</em> <u>text</u> <strong>here</strong>
+                                            {{($data != null) ? $data->short_description : ''}}
                                 </textarea>
                                     </div>
-
-
-                                    {{--                        <div class="form-group">--}}
-                                    {{--                            <label for="inputStatus">Tags</label>--}}
-                                    {{--                            <select id="inputStatus" name="tag" class="form-control custom-select">--}}
-                                    {{--                                @foreach($tags as $tag)--}}
-                                    {{--                                    <option value="{{$tag->id}}">{{$tag->name}}</option>--}}
-                                    {{--                                @endforeach--}}
-                                    {{--                            </select>--}}
-                                    {{--                        </div>--}}
-                                    {{--                        <div class="form-group">--}}
-                                    {{--                            <label for="inputDescription">Project Description</label>--}}
-                                    {{--                            <textarea id="inputDescription" class="form-control" rows="4"></textarea>--}}
-                                    {{--                        </div>--}}
-                                    {{--                        <div class="form-group">--}}
-                                    {{--                            <label for="inputStatus">Status</label>--}}
-                                    {{--                            <select id="inputStatus" class="form-control custom-select">--}}
-                                    {{--                                <option selected disabled>Select one</option>--}}
-                                    {{--                                <option>On Hold</option>--}}
-                                    {{--                                <option>Canceled</option>--}}
-                                    {{--                                <option>Success</option>--}}
-                                    {{--                            </select>--}}
-                                    {{--                        </div>--}}
-                                    {{--                        <div class="form-group">--}}
-                                    {{--                            <label for="inputClientCompany">Client Company</label>--}}
-                                    {{--                            <input type="text" id="inputClientCompany" class="form-control">--}}
-                                    {{--                        </div>--}}
-                                    {{--                        <div class="form-group">--}}
-                                    {{--                            <label for="inputProjectLeader">Project Leader</label>--}}
-                                    {{--                            <input type="text" id="inputProjectLeader" class="form-control">--}}
-                                    {{--                        </div>--}}
                                 </div>
                             </div>
 
-{{--                            <select class="bootstrap-select" name="drpDown" id="drpDown">--}}
-{{--                                <option value="1" selected="selected">Feature 1</option>--}}
-{{--                                <option value="2">Feature 2</option>--}}
-{{--                                <option value="3">Feature 3</option>--}}
-{{--                                <option value="4">Feature 4</option>--}}
-{{--                            </select>--}}
-
-{{--                            <div>--}}
-{{--                                <p id="1">Text1</p>--}}
-{{--                            </div>--}}
 
 
                             <div class="col-md-6">
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="inputName">quantity</label>
-                                        <input type="text" name="quantity" id="inputName" class="form-control">
+                                        <input type="text" name="quantity" value="{{($data != null) ? $data->stock_quantity : ''}} " id="inputName" class="form-control">
                                     </div>
                                     <div class="form-group" name="ggg" id="ggg">
                                         <label for="inputName">Combo product</label>

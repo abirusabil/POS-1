@@ -26,7 +26,8 @@
                     <th>Stock</th>
                     <th>Price</th>
                     <th>Categories</th>
-                    <th>Tags</th>
+                    <th>variant</th>
+                    <th>code</th>
                     <th>Action</th>
 
                 </tr>
@@ -40,31 +41,36 @@
                     <td>{{$product->name}}</td>
                     <td>{{($product->sku == '') ? '-' : $product->sku}}</td>
                     <td>{{($product->stock_status == 'instock') ? 'in stock' : 'Out of stock'}}</td>
-                    <td>${{$product->price}}</td>
+                    <?php
+                    $harga = (double) $product->price * (double)8500;
+                    $rupiah=number_format($harga,2,',','.');
+                    ?>
+                    <td>Rp.{{$rupiah }}</td>
                     {{-- <td>{!! $product->price_html !!}</td>--}}
                     <td>
                         @foreach($product->categories as $category)
                         {{$category->name}},
                         @endforeach
                     </td>
+                    <td>{{$product->type}}</td>
                     <td>
                         {!! DNS1D::getBarcodeHTML('dwqdqw', "C128",1.4,22) !!}
 
-                    @foreach($product->tags as $tag)
-                        {{$tag->name}},
-                        @endforeach
-                    </td>
+{{--                    @foreach($product->tags as $tag)--}}
+{{--                        {{$tag->name}},--}}
+{{--                        @endforeach--}}
+{{--                    </td>--}}
                     <td>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-info">
-                                <i class="fas fa-file"></i>
-                            </button>
-                            <button type="button" class="btn btn-info">
-                                <i class="fas fa-image"></i>
-                            </button>
-                            <button type="button" class="btn btn-warning">
+{{--                            <a href="{{route('printLabel',[$product->type,$product->id])}}" class="btn btn-info">--}}
+{{--                                <i class="fas fa-file"></i>--}}
+{{--                            </a>--}}
+{{--                            <button type="button" class="btn btn-info">--}}
+{{--                                <i class="fas fa-image"></i>--}}
+{{--                            </button>--}}
+                            <a href="{{route('products.edit',$product->id)}}" type="button" class="btn btn-warning">
                                 <i class="fas fa-edit"></i>
-                            </button>
+                            </a>
                             <a href="{{route('products.destroys',$product->id)}}" onclick="return confirm(`Are you sure?`)">
                                 <button type="button" class="btn btn-danger">
                                     <i class="fas fa-trash"></i>

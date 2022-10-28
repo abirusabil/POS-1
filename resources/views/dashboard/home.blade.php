@@ -78,7 +78,7 @@
                 <!-- /.info-box-content -->
             </div>
             <!-- /.info-box -->
-        </div>
+        </div>88
         <!-- /.col -->
     </div>
     <div class="card card-info">

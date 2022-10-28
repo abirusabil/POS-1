@@ -1,10 +1,25 @@
 
     <div class="form-group">
-        <div class="input-group ">
+        <center>
+        <!--<label for="">Hold</label>-->
+        <!--</center>-->
+        <!--<div class="input-group mt-3">-->
 
-            <select class="form-control" name="customer_id" id="customer_id">
-                @foreach($customers as $customer)
-                    <option value="{{$customer->id}}">{{$customer->first_name}} {{$customer->last_name}}</option>
+        <!--    <select class="form-control" onchange="changeCustomer($(this).val())">-->
+        <!--        <option >Pilih Customer</option>-->
+        <!--        @foreach($customers as $customer)-->
+        <!--            <option value="{{$customer->id}}">{{$customer->first_name}} {{$customer->last_name}}</option>-->
+        <!--        @endforeach-->
+        <!--    </select>-->
+        <!--</div>-->
+        <br>
+        <div class="input-group ">
+            <label for=""></label>
+
+            <select class="form-control" onchange="discount($(this).val())" name="customer_id" id="customer_id">
+                <option >Pilih Customer</option>
+            @foreach($customers as $customer)
+                    <option value="{{$customer->id}}">{{$customer->first_name}} {{$customer->last_name}} - {{$customer->id}}</option>
                 @endforeach
             </select>
 
@@ -40,7 +55,7 @@
                 <td><div class="price">{{$cart->price}}</div></td>
                 <td><input type="text" value="{{$cart->qty}}" id="qty" onchange="change({{$cart->id,}},$(this).val())" name="qty" style="width: 30px"></td>
                 <td><a id="subPrice">{{$cart->subTotal}}</a></td>
-                <td>dlt</td>
+                <td><a href="{{route('delete.cart',$cart->id)}}">dlt</a></td>
 
             </tr>
 
@@ -55,13 +70,16 @@
                 <td>Total <a id="totalS"> {{$total}}</a></td>
             </tr>
             <tr>
-                <td>discount : 0</td>
+                <td>discount : <a id="discountT"> 0</a></td>
                 <td>tax : 0</td>
             </tr>
             <tr>
-                <td>total payable : <a id="totalS"> {{$total}}</a></td>
+                <td>total payable : <a id="totalPay"> {{$total}}</a></td>
             </tr>
         </table>
+
+        <a onclick="hold()" class="btn btn-danger">Hold</a>
+{{--        <a href="h" class="btn btn-warning">Invoice</a>--}}
         <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#modal-payment">Payment</button>
 
     </div>
@@ -114,10 +132,11 @@
 
                     <div class="form-group mt-3">
                         <labe>Customer Discount % </labe>
-                        <select class="form-control " name="customer-discount">
-                            <option>Select</option>
-                            <option>diskon anniversary </option>
-
+                        <select class="form-control " name="customer_discount">
+                            <option value="{{null}}">Select</option>
+                            @foreach($discount as $dscont)
+                            <option value="{{$dscont->id}}">{{$dscont->name}}</option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -152,14 +171,14 @@
 
                     <div class="form-group mt-3">
                         <labe>Note </labe>
-                        <input type="input" name="customer_name" class="form-control" id="note">
+                        <input type="input" name="note_pay" class="form-control" id="note_pay">
 
                     </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mt-3">
                             <labe>Amount </labe>
-                            <input type="input" name="customer_name" value="0" class="form-control" onchange="actionAmount($(this).val())" id="amount">
+                            <input type="input" name="amount_pay" value="0" class="form-control" onchange="actionAmount($(this).val())" id="amount_pay">
 
                         </div>
                     </div>
@@ -202,20 +221,60 @@
 
     document.getElementById("subPrice").innerHTML = total.toFixed(2);
 
-
-    function payment(){
-        customer_id = document.getElementById("customer_id").value;
-        reference_note = document.getElementById("reference_note").value;
-        payment_note = document.getElementById("reference_note").payment_note;
-        amount = document.getElementById("reference_note").amount;
-
-
+    function discount(val){
         var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
 
         $.ajax({
             /* the route pointing to the post function */
-            url: '/createOrder',
+            url: '/getDiscount',
+            type: 'POST',
+            /* send the csrf-token and the input to the controller */
+            data: {
+                _token: CSRF_TOKEN,
+                customer_id:val,
+                // subTotal : total.toFixed(2)
+            },
+            dataType: 'JSON',
+            /* remind that 'data' is the response of the AjaxController */
+            success: function (data) {
+                // $(".writeinfo").append(data.msg);
+                // alert()
+                var ass = '{{$total}}';
+                // console.log(parseInt(ass));
+                totalss = parseFloat(ass) - parseFloat(data['discount']);
+                console.log(totalss);
+                document.getElementById("discountT").innerHTML = data['discount'];
+                document.getElementById("totalPay").innerHTML = String(totalss);
+
+
+            }
+        });
+    }
+
+    function changeCustomer (val){
+        // customer_id = document.getElementById("customer_id").value;
+        // alert();
+
+
+        window.location.replace("{{url('hold')}}/"+val);
+
+    }
+
+    function hold(){
+        customer_id = document.getElementById("customer_id").value;
+        // alert(customer_id);
+        //
+        // return;
+        reference_note = document.getElementById("reference_note").value;
+        payment_note = document.getElementById("reference_note").payment_note;
+        amount = document.getElementById("reference_note").amount;
+
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            /* the route pointing to the post function */
+            url: '/hold',
             type: 'POST',
             /* send the csrf-token and the input to the controller */
             data: {
@@ -237,6 +296,39 @@
 
             }
         });
+
+    }
+
+    function payment(){
+
+        customer_id = document.getElementById("customer_id").value;
+        note_pay = document.getElementById("reference_note").value;
+        amount_pay = document.getElementById("amount_pay").value;
+
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            /* the route pointing to the post function */
+            url: '/createOrder',
+            type: 'POST',
+            /* send the csrf-token and the input to the controller */
+            data: {
+                _token: CSRF_TOKEN,
+                customer_id:customer_id,
+                note_pay:note_pay,
+                amount_pay:amount_pay,
+                // subTotal : total.toFixed(2)
+            },
+            dataType: 'JSON',
+            /* remind that 'data' is the response of the AjaxController */
+            success: function (data) {
+                // $(".writeinfo").append(data.msg);
+                // alert()
+                console.log(data);
+                console.log('success');
+                location.reload();
+
+            }
+        });
     }
 
 
@@ -244,7 +336,6 @@
         // alert(val)
     }
     function change(id,val){
-
 
         // alert(val);
         // return;

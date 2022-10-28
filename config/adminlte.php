@@ -296,6 +296,7 @@ return [
             'text'        => 'POS',
             'url'         => '/pos',
             'icon'        => 'fas fa-folder',
+
 //            'label'       => 4,
 //            'label_color' => 'success',
         ],
@@ -303,6 +304,14 @@ return [
             'text'        => 'Dashboard',
             'url'         => '/home',
             'icon'        => 'fas fa-folder',
+//            'label'       => 4,
+//            'label_color' => 'success',
+        ],
+        [
+            'text'        => 'Transaction',
+            'url'         => '/transaction',
+            'icon'        => 'fas fa-folder',
+            'can'         => 'admin'
 //            'label'       => 4,
 //            'label_color' => 'success',
         ],
@@ -320,10 +329,17 @@ return [
                 [
                     'text' => 'Add product',
                     'url'  => '/products/a/create',
+                    'can'         => 'admin'
                 ],
                 [
                     'text' => 'Import product',
                     'url'  => '/products/import',
+                    'can'         => 'admin'
+                ],
+                [
+                    'text' => 'Print label',
+                    'url'  => '/products/label',
+                    'can'         => 'admin'
                 ],
             ],
         ],
@@ -338,6 +354,26 @@ return [
                 [
                     'text' => 'Add category',
                     'url'  => '/categories/a/create',
+                    'can'         => 'admin'
+                ],
+//                [
+//                    'text' => 'Import product',
+//                    'url'  => '/categories/import',
+//                ],
+            ],
+        ],
+        [
+            'text'    => 'Users',
+            'icon'    => 'fas fa-fw fa-share',
+            'submenu' => [
+                [
+                    'text' => 'List Users',
+                    'url'  => '/users',
+                ],
+                [
+                    'text' => 'Add User',
+                    'url'  => '/users/create',
+                    'can'         => 'admin'
                 ],
 //                [
 //                    'text' => 'Import product',
@@ -356,6 +392,7 @@ return [
                 [
                     'text' => 'Add expense',
                     'url'  => '/expense/create',
+                    'can'         => 'admin'
                 ],
 //                [
 //                    'text' => 'Import product',
@@ -364,63 +401,23 @@ return [
             ],
         ],
         [
-            'text' => 'change_password',
-            'url'  => 'admin/settings',
-            'icon' => 'fas fa-fw fa-lock',
-        ],
-        [
-            'text'    => 'multilevel',
+            'text'    => 'Discount',
             'icon'    => 'fas fa-fw fa-share',
             'submenu' => [
                 [
-                    'text' => 'level_one',
-                    'url'  => '#',
+                    'text' => 'List Discount',
+                    'url'  => '/discount',
                 ],
                 [
-                    'text'    => 'level_one',
-                    'url'     => '#',
-                    'submenu' => [
-                        [
-                            'text' => 'level_two',
-                            'url'  => '#',
-                        ],
-                        [
-                            'text'    => 'level_two',
-                            'url'     => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                            ],
-                        ],
-                    ],
+                    'text' => 'Add Discount',
+                    'url'  => '/discount/create',
+                    'can'         => 'admin'
                 ],
-                [
-                    'text' => 'level_one',
-                    'url'  => '#',
-                ],
+//                [
+//                    'text' => 'Import product',
+//                    'url'  => '/categories/import',
+//                ],
             ],
-        ],
-        ['header' => 'labels'],
-        [
-            'text'       => 'important',
-            'icon_color' => 'red',
-            'url'        => '#',
-        ],
-        [
-            'text'       => 'warning',
-            'icon_color' => 'yellow',
-            'url'        => '#',
-        ],
-        [
-            'text'       => 'information',
-            'icon_color' => 'cyan',
-            'url'        => '#',
         ],
     ],
 
