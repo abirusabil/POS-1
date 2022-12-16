@@ -341,8 +341,10 @@ return [
                     'url'  => '/products/label',
                     'can'         => 'admin'
                 ],
+                
             ],
         ],
+        
         [
             'text'    => 'Categories',
             'icon'    => 'fas fa-fw fa-share',
@@ -361,6 +363,27 @@ return [
 //                    'url'  => '/categories/import',
 //                ],
             ],
+        ],
+        [
+            'text'    => 'Purchase',
+            'icon'    => 'fas fa-fw fa-share',
+            'submenu' => [
+                [
+                    'text' => 'List purchase',
+                    'url'  => '/products/listpurchases',
+                    'can'  => 'admin'
+                ],
+                [
+                    'text' => 'Add purchase',
+                    'url'  => '/products/purchase',
+                    'can'         => 'admin'
+                ],
+//                [
+//                    'text' => 'Import product',
+//                    'url'  => '/categories/import',
+//                ],
+            ],
+            
         ],
         [
             'text'    => 'Users',
@@ -386,7 +409,7 @@ return [
             'icon'    => 'fas fa-fw fa-share',
             'submenu' => [
                 [
-                    'text' => 'List category',
+                    'text' => 'List exspense',
                     'url'  => '/expense',
                 ],
                 [

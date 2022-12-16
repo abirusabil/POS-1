@@ -3,7 +3,8 @@
 @section('title', 'Dashboard')
 
 @section('content_header')
-
+    {{-- fontawesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {{--    <link rel="stylesheet" href="{{asset('uplot/uPlot.min.css')}}">--}}
 
 @stop
@@ -17,7 +18,7 @@
     <div class="col-md-9">
 
         <div class="container-fluid">
-        <h2 class="text-center display-4">Search</h2>
+        <h2 class="text-center display-4">Search</i></h2>
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <form action="{{route('pos.search')}}" method="post">
@@ -39,9 +40,9 @@
         <div class="row mt-4">
             @foreach($products as $product)
 
-            <div class="col-md-4">
+            <div class="col-md-3 mb-4">
                 <a href="{{($product->type == 'variable') ? route('posVariable',$product->id) : route('actionCart',[$product->name,$product->regular_price,$product->id,'simple'])}}">
-                <div class="card" style="width: 15rem;">
+                <div class="card h-100">
                     <img class="card-img-top" src="{{$product->images[0]->src}}">
                     <div class="card-body">
                         <h5 class="card-title"> {{$product->type}} - {{$product->name}}</h5>

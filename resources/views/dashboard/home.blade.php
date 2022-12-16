@@ -27,6 +27,9 @@
 @stop
 
 @section('content')
+
+
+
     <div class="row">
         <div class="col-md-3 col-sm-6 col-12">
             <div class="info-box">
@@ -34,7 +37,7 @@
 
                 <div class="info-box-content">
                 <span class="info-box-text">Total sales<span>
-                <span class="info-box-number">$ {{$data['total_sales']}}</span>
+                <span class="info-box-number">Rp. {{number_format($total_sales,2)}}</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>
@@ -47,7 +50,7 @@
 
                 <div class="info-box-content">
                     <span class="info-box-text">net</span>
-                    <span class="info-box-number"><b>$</b> {{ ($net <= 0 ) ?'0' : $net}}</span>
+                    <span class="info-box-number"><b>Rp. </b> {{ number_format($net,2) }}</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>
@@ -60,7 +63,7 @@
                 <span class="info-box-icon bg-warning"><i class="far fa-copy"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">invoice due</span>
-                    <span class="info-box-number">13,648</span>
+                    <span class="info-box-number">Rp. {{ number_format($invoice_due,2) }}</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>
@@ -72,13 +75,16 @@
                 <span class="info-box-icon bg-danger"><i class="far fa-star"></i></span>
 
                 <div class="info-box-content">
-                    <span class="info-box-text">total purhase</span>
-                    <span class="info-box-number">93,139</span>
+                    <span class="info-box-text">total purchase</span>
+                    <span class="info-box-number">Rp. {{ number_format($total_purchase) }}</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>
             <!-- /.info-box -->
-        </div>88
+        </div>
+
+       
+
         <!-- /.col -->
     </div>
     <div class="card card-info">
@@ -100,6 +106,60 @@
             </div>
         </div>
         <!-- /.card-body -->
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 w-100">
+            <h1>List Stock</h1>
+            <div class="card w-100">
+                <div class="card-body p-0">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($products as $product)
+                                @if( $product->stock_quantity < 2)
+                                    @if(!empty($product->attributes))
+                                        @foreach($product->attributes[0]->options as $index => $size)
+                                        <tr>
+                                            <td>{{$product->name}}</td>
+                                            <td>
+                                                @foreach($product->attributes as $attribute)
+                                                {{ $attribute->options[$index] }}
+                                                @endforeach
+                                            </td>
+                                            <td>{{$product->stock_quantity}}</td>
+                                            <td>
+                                                {{ $product->stock_status }}
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    @else
+                                    <tr>
+                                          <td>
+                                            {{$product->name}}
+                                        </td>
+                                        <td>
+                                        </td>
+                                        <td>{{$product->stock_quantity}}</td>
+                                        <td>
+                                            {{ $product->stock_status }}
+                                    </td>
+                                    </tr>
+                                    @endif
+                                @endif
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 @stop

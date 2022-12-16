@@ -55,7 +55,7 @@
                 <td><div class="price">{{$cart->price}}</div></td>
                 <td><input type="text" value="{{$cart->qty}}" id="qty" onchange="change({{$cart->id,}},$(this).val())" name="qty" style="width: 30px"></td>
                 <td><a id="subPrice">{{$cart->subTotal}}</a></td>
-                <td><a href="{{route('delete.cart',$cart->id)}}">dlt</a></td>
+                <td><a href="{{route('delete.cart',$cart->id)}}"><i class="fas fa-times" ></i></a></td>
 
             </tr>
 
@@ -78,7 +78,7 @@
             </tr>
         </table>
 
-        <a onclick="hold()" class="btn btn-danger">Hold</a>
+        <button type="submit" onclick="hold()" href="dashboard.transaction"  class="btn btn-danger">Hold</button>
 {{--        <a href="h" class="btn btn-warning">Invoice</a>--}}
         <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#modal-payment">Payment</button>
 
@@ -110,27 +110,31 @@
                                 <input type="email" name="customer_email" class="form-control" id="exampleInputEmail1">
 
                             </div>
-                            <div class="form-group mt-3">
-                                <labe>Address </labe>
-                                <input type="input" name="customer_address" class="form-control" id="exampleInputEmail1">
-
-                            </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md">
                             <div class="form-group mt-3">
                                 <labe>Phone </labe>
                                 <input type="input" name="customer_phone" class="form-control" id="exampleInputEmail1" >
 
                             </div>
-                            <div class="form-group mt-3">
+                            {{-- <div class="form-group mt-3">
                                 <labe>Tracking Number </labe>
                                 <input type="input" name="customer_track" class="form-control" id="exampleInputEmail1" >
 
+                            </div> --}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="form-group mt-3">
+                                <labe>Address </labe>
+                                <input type="input" name="customer_address" class="form-control" id="exampleInputEmail1">
+    
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group mt-3">
+                    {{-- <div class="form-group mt-3">
                         <labe>Customer Discount % </labe>
                         <select class="form-control " name="customer_discount">
                             <option value="{{null}}">Select</option>
@@ -138,7 +142,7 @@
                             <option value="{{$dscont->id}}">{{$dscont->name}}</option>
                             @endforeach
                         </select>
-                    </div>
+                    </div> --}}
 
                     <button type="submit" class="btn btn-primary">Save changes</button>
                 </form>
@@ -197,8 +201,31 @@
                     <input type="input" name="payment_note" class="form-control" id="payment_note">
 
                 </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group mt-3">
+                            <labe>Tracking Number </labe>
+                            <input type="input" name="customer_track" class="form-control" id="exampleInputEmail1" >
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group mt-3">
+                            <labe>Customer Discount % </labe>
+                            <select class="form-control " name="customer_discount">
+                                <option value="{{null}}">Select</option>
+                                @foreach($discount as $dscont)
+                                <option value="{{$dscont->id}}">{{$dscont->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                 
 
-                <button type="submit" class="btn btn-primary" onclick="payment()">Save changes</button>
+                    
+                
+
+                <button type="submit" class="btn btn-primary" onclick="payment()">PAY</button>
             </div>
         </div>
         <!-- /.modal-content -->

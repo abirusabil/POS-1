@@ -8,19 +8,22 @@ use App\Models\Discount;
 use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Purchase;
 use Automattic\WooCommerce\Client;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
 
 class HomeController extends Controller
 {
-    public function transaction(){
+    public function transaction()
+    {
         // $woocommerce = $this->woocommerce();
         // // dd($woocommerce->get('customers'));
         // dd($woocommerce->delete('customers/6', ['force' => true]));
-        $data = Transaction::with(['customers','carts'])->orderBy('created_at','desc')->get();
+        $data = Transaction::with(['customers', 'carts'])->orderBy('created_at', 'desc')->get();
 
         // dd($data);
         view()->share([
@@ -29,23 +32,28 @@ class HomeController extends Controller
 
         return view('dashboard.transaction');
     }
-    public function deleteCart($id){
+    public function deleteCart($id)
+    {
         $data = cart::find($id);
 
         $data->delete();
 
         return redirect()->back();
     }
-    public function printLabel($type,$id){
+
+    public function printLabel($type, $id)
+    {
         return view('dashboard.printLabel');
-
     }
+    
 
-    public function showCustomer (){
+    public function showCustomer()
+    {
         dd($this->customer());
     }
 
-    public function hold (Request $request){
+    public function hold(Request $request)
+    {
 
         $cartss = $this->cart();
 
@@ -54,7 +62,7 @@ class HomeController extends Controller
 
         $customer_id = '';
         $data = new Transaction();
-        foreach ($cartss as $crt ){
+        foreach ($cartss as $crt) {
             $crt->status = '0';
             $crt->customer_id = $request->customer_id;
 
@@ -70,13 +78,14 @@ class HomeController extends Controller
         ]);
     }
 
-    public function printInvoice ($id){
+    public function printInvoice($id)
+    {
         $data = Transaction::with(['customers'])->whereId($id)->first();
 
-        $carts = cart::where('transaction_id','=',$id)->get();
+        $carts = cart::where('transaction_id', '=', $id)->get();
 
         $tmp = 0;
-        foreach ($carts as $a){
+        foreach ($carts as $a) {
             $tmp = $tmp + $a->subTotal;
         }
 
@@ -88,24 +97,25 @@ class HomeController extends Controller
         return view('dashboard.printInvoice');
     }
 
-    public function printShipping ($id){
+    public function printShipping($id)
+    {
 
-//        dd('dqw');
+        //        dd('dqw');
 
         $data = Transaction::with(['customers'])->whereId($id)->first();
         $woocommerce = $this->woocommerce();
 
-        $customer =$woocommerce->get('customers/'.$data->customer_id);
+        $customer = $woocommerce->get('customers/' . $data->customer_id);
 
         $shipping = (array) $customer->shipping;
-//        dd($shipping['address_1']);
-        $carts = cart::where('transaction_id','=',$id)->get();
+        //        dd($shipping['address_1']);
+        $carts = cart::where('transaction_id', '=', $id)->get();
 
-        $cs = Customer::where('customer_id','=',$data->customer_id)->first();
+        $cs = Customer::where('customer_id', '=', $data->customer_id)->first();
 
-//        dd($cs);
+        //        dd($cs);
         $tmp = 0;
-        foreach ($carts as $a){
+        foreach ($carts as $a) {
             $tmp = $tmp + $a->subTotal;
         }
 
@@ -117,10 +127,10 @@ class HomeController extends Controller
             'cs' => $cs
         ]);
         return view('dashboard.printShipping');
-
     }
 
-    public function customer (){
+    public function customer()
+    {
         $woocommerce = $this->woocommerce();
 
         $data = $woocommerce->get('customers');
@@ -128,30 +138,30 @@ class HomeController extends Controller
         return $data;
     }
 
-    public function createOrder(Request $request){
+    public function createOrder(Request $request)
+    {
         $woocommerce = $this->woocommerce();
 
-        $customer =$woocommerce->get('customers/'.$request->customer_id);
+        $customer = $woocommerce->get('customers/' . $request->customer_id);
 
         $carts = $this->cart();
 
         $tmp = [];
         $i = 0;
-        foreach ($carts as $cart ){
+        foreach ($carts as $cart) {
 
-            if ($cart->variant_id == null){
+            if ($cart->variant_id == null) {
                 $tmp[$i++] = [
                     'product_id' => $cart->product_id,
                     'quantity' => $cart->qty
                 ];
-            }else{
+            } else {
                 $tmp[$i++] = [
                     'product_id' => $cart->product_id,
                     'variation_id' => $cart->variant_id,
                     'quantity' => $cart->qty
                 ];
             }
-
         }
 
         $data = [
@@ -196,7 +206,7 @@ class HomeController extends Controller
 
         $tmp = [];
         $i = 0;
-        foreach ($cartss as $crt ){
+        foreach ($cartss as $crt) {
             $crt->status = '1';
             $crt->transaction_id = $transaction->id;
 
@@ -213,9 +223,10 @@ class HomeController extends Controller
     }
 
 
-    public function createCustomer(Request $request){
+    public function createCustomer(Request $request)
+    {
 
-//        dd($request->customer_discount);
+        //        dd($request->customer_discount);
 
         $PecahStr = explode(" ", $request->customer_name);
 
@@ -224,14 +235,14 @@ class HomeController extends Controller
 
         unset($PecahStr[0]);
 
-//        dd(count($PecahStr));
+        //        dd(count($PecahStr));
         $woocommerce = $this->woocommerce();
 
         $data = [
             'email' => $request->customer_email,
             'first_name' => $frist,
-            'last_name' => implode(' ',$PecahStr),
-//            'username' => 'john.doe',
+            'last_name' => implode(' ', $PecahStr),
+            //            'username' => 'john.doe',
             'billing' => [
                 'first_name' => 'John',
                 'last_name' => 'Doe',
@@ -242,7 +253,7 @@ class HomeController extends Controller
             ],
             'shipping' => [
                 'first_name' => $frist,
-                'last_name' => implode(' ',$PecahStr),
+                'last_name' => implode(' ', $PecahStr),
                 'address_1' => $request->customer_address,
                 'country' => 'INA',
                 'email' => $request->customer_email,
@@ -264,32 +275,33 @@ class HomeController extends Controller
         $cs->save();
 
         return redirect()->back();
-
     }
 
-    public function totalPrice(){
+    public function totalPrice()
+    {
 
 
         return response()->json([
             'total' => $this->total()
         ]);
     }
-    public function updateQty(Request $request){
+    public function updateQty(Request $request)
+    {
 
         $id = $request->id;
         $data = cart::find($id);
         $data->qty = $request->qty;
-        $data->subTotal = round($data->qty * $data->price,2);
+        $data->subTotal = round($data->qty * $data->price, 2);
 
         $data->save();
 
         return response()->json([
             'status' => 'success'
         ]);
-
     }
 
-    public function actionCart($name,$price,$product_id,$variant_id = ''){
+    public function actionCart($name, $price, $product_id, $variant_id = '')
+    {
 
 
         $data = new cart();
@@ -300,18 +312,17 @@ class HomeController extends Controller
         $data->subTotal = $price;
         $data->status = '0';
         $data->user_id = Auth::user()->id;
-        if ($variant_id != 'simple'){
+        if ($variant_id != 'simple') {
             $data->variant_id = $variant_id;
         }
         $data->product_id = $product_id;
         $data->save();
 
         return redirect()->back();
-
     }
 
-    public function pos (Request $request){
-
+    public function pos(Request $request)
+    {
         if ($request->page == null || $request->page == '') {
             $page = '1';
         } else {
@@ -320,20 +331,20 @@ class HomeController extends Controller
 
 
         $woocommerce = $this->woocommerce();
-        $array = $woocommerce->get('products?page=' . $page);
+        $array = $woocommerce->get('products?per_page=12&stock_status=instock&page=' . $page);
+        // return $array;
 
 
         $a = $woocommerce->http->getResponse();
         $headers = $a->getHeaders();
         $totalPages = $headers['x-wp-totalpages'];
         $total = $headers['x-wp-total'];
-        // $current_page = '1';
+        $current_page = '1';
 
         $array = new Paginator($array, $total, '10', $page, [
             'path' => $request->url(),
             'query' => $request->query(),
         ]);
-
         // dd($array);
         //        dd($data);
 
@@ -349,10 +360,10 @@ class HomeController extends Controller
         ]);
 
         return view('dashboard.pos');
-
     }
-    public function posSearch(Request $request){
-//        dd($request->search);
+    public function posSearch(Request $request)
+    {
+        //        dd($request->search);
         if ($request->page == null || $request->page == '') {
             $page = '1';
         } else {
@@ -392,7 +403,8 @@ class HomeController extends Controller
         return view('dashboard.pos');
     }
 
-    public function holdView ($customer_id,Request $request){
+    public function holdView($customer_id, Request $request)
+    {
         if ($request->page == null || $request->page == '') {
             $page = '1';
         } else {
@@ -432,9 +444,9 @@ class HomeController extends Controller
 
 
         return view('dashboard.pos');
-
     }
-    public function posVariable ($id,Request $request){
+    public function posVariable($id, Request $request)
+    {
         if ($request->page == null || $request->page == '') {
             $page = '1';
         } else {
@@ -443,9 +455,9 @@ class HomeController extends Controller
 
         $woocommerce = $this->woocommerce();
 
-        $array = $woocommerce->get('products/'.$id.'/variations');
+        $array = $woocommerce->get('products/' . $id . '/variations');
 
-//        dd($array);
+        //        dd($array);
         $a = $woocommerce->http->getResponse();
         $headers = $a->getHeaders();
         $totalPages = $headers['x-wp-totalpages'];
@@ -457,7 +469,7 @@ class HomeController extends Controller
             'query' => $request->query(),
         ]);
 
-        $get = $woocommerce->get('products/'.$id);
+        $get = $woocommerce->get('products/' . $id);
         // dd($array);
         //        dd($data);
         $discount = Discount::all();
@@ -474,39 +486,38 @@ class HomeController extends Controller
 
 
         return view('dashboard.posVariable');
-
     }
 
-    public function index($filter = '')
+    public function index( $filter = '')
     {
         $expense = Expense::all();
 
         $tmpExpense = 0;
-//        $q = 0;
+        //        $q = 0;
 
-        foreach ($expense as $x){
+        foreach ($expense as $x) {
             $tmpExpense = $tmpExpense + $x->price;
         }
 
         $modal = Product::all();
         $tmpModal = 0;
 
-        foreach ($modal as $s){
+        foreach ($modal as $s) {
             $tmpModal = $tmpModal + $s->price_sale;
         }
 
-//        dd($tmpModal);
+        //        dd($tmpModal);
 
         $dt = Carbon::now();
         $now = $dt->toDateString();
 
-//        dd($filter);
-        if ($filter == ''){
+        //        dd($filter);
+        if ($filter == '') {
             $query = [
-//                'date_min' => '2016-05-01',
-//                'date_max' => '2016-05-04'
+                //                'date_min' => '2016-05-01',
+                //                'date_max' => '2016-05-04'
             ];
-        }elseif ($filter == 'yesterday'){
+        } elseif ($filter == 'yesterday') {
 
             $yesterday = Carbon::yesterday();
 
@@ -514,23 +525,23 @@ class HomeController extends Controller
                 'date_min' => $yesterday->toDateString(),
                 'date_max' => $yesterday->toDateString()
             ];
-        }elseif ($filter == 'last7day'){
+        } elseif ($filter == 'last7day') {
 
             $asd = $dt->subDays(7);
             $query = [
                 'date_min' => $asd->toDateString(),
                 'date_max' => $now
             ];
-        }elseif ($filter == 'last30day'){
+        } elseif ($filter == 'last30day') {
             $asd = $dt->subDays(30);
             $query = [
                 'date_min' => $asd->toDateString(),
                 'date_max' => $now
             ];
-        }elseif ($filter == 'thisMonth'){
+        } elseif ($filter == 'thisMonth') {
 
-//            dd($dt->lastOfMonth()->toDateString());
-//            $asd = $dt->subDays(30);
+            //            dd($dt->lastOfMonth()->toDateString());
+            //            $asd = $dt->subDays(30);
             $query = [
                 'date_min' => $dt->firstOfMonth()->toDateString(),
                 'date_max' => $dt->lastOfMonth()->toDateString()
@@ -538,47 +549,73 @@ class HomeController extends Controller
         }
         $woocommerce = $this->woocommerce();
 
-//        $query = [
-//            '2016-05-03' => 'dwqd',
-//            '2016-05-03' => 'dqwdqwdwq'
-//        ];
-//
-//        for($a = 0; $a<=1;$a++){
-//            echo $query['2016-05-03'];
-//        }
-//        return;
+        //        $query = [
+        //            '2016-05-03' => 'dwqd',
+        //            '2016-05-03' => 'dqwdqwdwq'
+        //        ];
+        //
+        //        for($a = 0; $a<=1;$a++){
+        //            echo $query['2016-05-03'];
+        //        }
+        //        return;
 
 
 
         $data = $woocommerce->get('reports/sales', $query);
-//        $data = $woocommerce->get('reports/sales');
+        // return $data;
+        //        $data = $woocommerce->get('reports/sales');
         $anjg = (array) $data[0];
         $totals = (array) $anjg['totals'];
         $date = array_keys($totals);
-//            dd($anjg);
+        $products = $woocommerce->get('products?');
+        // return $products;
+        // $ = Purchase::select("SUM(total_price)");
+        $total_purchase = Purchase::get()->sum('total_price') * 8500;
+        $total_sales = Cart::where('status',1)->sum('subTotal') * 8500;
+        $invoice_due = Cart::where('status',0)->sum('subTotal') * 8500;
+        $expense = Expense::get()->sum('price');
+        $total_expense =$expense ;
+        // return $total_expense;
+        $total_net = $total_sales - $total_purchase - $total_expense;
+        
+       
+        
+        // $results = DB::select('select * from insurance_policy where Id = ?', [1]);
+
+        //                                    $row = $results->fetch_assoc();
+       
+        // return $products;
+       
+        //            dd($anjg);
+      
 
         $tmp = [];
         $u = 0;
-        foreach ($totals as $total){
+        foreach ($totals as $total) {
             $a = (array) $total;
-//            echo $total->sales;
+            //            echo $total->sales;
             $tmp[$u++] = $a;
         }
-//        dd($tmp);
-//        return;
-//        dd($anjg['total_sales']);
+        //        dd($tmp);
+        //        return;
+        //        dd($anjg['total_sales']);
 
 
         $net = ($anjg['total_sales'] - $tmpModal) - $tmpExpense;
 
-//        dd($net);
+        //        dd($net);
 
 
         view()->share([
             'dates' => $date,
             'totals' => $totals,
             'data' => $anjg,
-            'net' => $net
+            'net' => $net,
+            'products'=>$products,
+            'total_purchase'=>$total_purchase,
+            'total_sales'=>$total_sales,
+            'invoice_due'=>$invoice_due,
+            'net' => $total_net,
         ]);
         return view('dashboard.home');
     }
@@ -588,7 +625,8 @@ class HomeController extends Controller
     //    }
 
 
-    public function report(){
+    public function report()
+    {
         $woocommerce = $this->woocommerce();
 
         $data = $woocommerce->get('reports/sales');
@@ -610,16 +648,16 @@ class HomeController extends Controller
 
         $array = $woocommerce->get('products?page=6');
 
-//        $a = $woocommerce->http->getResponse();
-//        $headers = $a->getHeaders();
-//        $totalPages = $headers['x-wp-totalpages'];
-//        $total = $headers['x-wp-total'];
-//        $current_page = '1';
-//
-//        $array = new Paginator($array, $total, '10', $current_page, [
-//            'path' => $request->url(),
-//            'query' => $request->query(),
-//        ]);
+        //        $a = $woocommerce->http->getResponse();
+        //        $headers = $a->getHeaders();
+        //        $totalPages = $headers['x-wp-totalpages'];
+        //        $total = $headers['x-wp-total'];
+        //        $current_page = '1';
+        //
+        //        $array = new Paginator($array, $total, '10', $current_page, [
+        //            'path' => $request->url(),
+        //            'query' => $request->query(),
+        //        ]);
 
         dd($array);
     }
@@ -648,7 +686,8 @@ class HomeController extends Controller
 
         dd($this->woocommerce()->post('products/1064/variations', $data));
     }
-    public function updateProduct (){
+    public function updateProduct()
+    {
         $woocommerce = $this->woocommerce();
 
         $data = [
@@ -680,70 +719,71 @@ class HomeController extends Controller
 
         dd($this->woocommerce()->post('products', $data));
 
-//        $woocommerce = $this->woocommerce();
-//
-//        $data = [
-//            'name' => 'Ship Your Idea',
-//            'type' => 'variable',
-//            'regular_price' => '21.99',
-//            'description' => 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
-//            'short_description' => 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
-//            'categories' => [
-//                [
-//                    'id' => 40
-//                ],
-//            ],
-//            'images' => [
-//                [
-//                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg'
-//                ],
-//                [
-//                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_back.jpg'
-//                ],
-//                [
-//                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg'
-//                ],
-//                [
-//                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_back.jpg'
-//                ]
-//            ],
-//            'attributes' => [
-//                [
-////                    'id' => 6,
-//                    'position' => 0,
-//                    'visible' => false,
-//                    'variation' => true,
-//                    'options' => [
-//                        'Black',
-//                        'Green'
-//                    ]
-//                ],
-//                [
-//                    'name' => 'Size',
-//                    'position' => 0,
-//                    'visible' => true,
-//                    'variation' => true,
-//                    'options' => [
-//                        'S',
-//                        'M'
-//                    ]
-//                ]
-//            ],
-//            'default_attributes' => [
-//                [
-////                    'id' => 6,
-//                    'option' => 'Black'
-//                ],
-//                [
-//                    'name' => 'Size',
-//                    'option' => 'S'
-//                ]
-//            ]
-//        ];
-//
-//        dd($woocommerce->post('products', $data));
+        //        $woocommerce = $this->woocommerce();
+        //
+        //        $data = [
+        //            'name' => 'Ship Your Idea',
+        //            'type' => 'variable',
+        //            'regular_price' => '21.99',
+        //            'description' => 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
+        //            'short_description' => 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
+        //            'categories' => [
+        //                [
+        //                    'id' => 40
+        //                ],
+        //            ],
+        //            'images' => [
+        //                [
+        //                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg'
+        //                ],
+        //                [
+        //                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_back.jpg'
+        //                ],
+        //                [
+        //                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg'
+        //                ],
+        //                [
+        //                    'src' => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_back.jpg'
+        //                ]
+        //            ],
+        //            'attributes' => [
+        //                [
+        ////                    'id' => 6,
+        //                    'position' => 0,
+        //                    'visible' => false,
+        //                    'variation' => true,
+        //                    'options' => [
+        //                        'Black',
+        //                        'Green'
+        //                    ]
+        //                ],
+        //                [
+        //                    'name' => 'Size',
+        //                    'position' => 0,
+        //                    'visible' => true,
+        //                    'variation' => true,
+        //                    'options' => [
+        //                        'S',
+        //                        'M'
+        //                    ]
+        //                ]
+        //            ],
+        //            'default_attributes' => [
+        //                [
+        ////                    'id' => 6,
+        //                    'option' => 'Black'
+        //                ],
+        //                [
+        //                    'name' => 'Size',
+        //                    'option' => 'S'
+        //                ]
+        //            ]
+        //        ];
+        //
+        //        dd($woocommerce->post('products', $data));
     }
-    public function createOption (Request $request){
+    public function createOption(Request $request)
+    {
 
 
         $woocommerce = $this->woocommerce();
@@ -766,7 +806,7 @@ class HomeController extends Controller
         dd($woocommerce->put('products/1064', $data));
     }
 
-    public function createAttribute (Request $request)
+    public function createAttribute(Request $request)
     {
         $woocommerce = $this->woocommerce();
 
@@ -778,21 +818,22 @@ class HomeController extends Controller
 
         dd($woocommerce->post('products/attributes', $data));
     }
-    public function showAttribute(){
+    public function showAttribute()
+    {
         $woocommerce = $this->woocommerce();
 
         dd($woocommerce->get('products/attributes'));
-//        dd($woocommerce->get('products/attributes/4/terms'));
+        //        dd($woocommerce->get('products/attributes/4/terms'));
 
     }
-    public function order (){
-            $woocommerce = $this->woocommerce();
-            dd($woocommerce->get('orders'));
-
-
+    public function order()
+    {
+        $woocommerce = $this->woocommerce();
+        dd($woocommerce->get('orders'));
     }
-    public function orderCart (){
-            $woocommerce = $this->woocommerce();
+    public function orderCart()
+    {
+        $woocommerce = $this->woocommerce();
 
         $data = [
             'payment_method' => 'cash',
@@ -836,13 +877,13 @@ class HomeController extends Controller
         ];
 
         dd($woocommerce->post('orders', $data));
-
     }
 
-    public function getDiscount(Request $request){
+    public function getDiscount(Request $request)
+    {
         $data = Customer::whereCustomerId($request->customer_id)->first();
         $discount = 0;
-        if ($data != null){
+        if ($data != null) {
             $discount = (int) $data->discount;
         }
 
@@ -850,5 +891,4 @@ class HomeController extends Controller
             'discount' => $discount
         ]);
     }
-
 }

@@ -3,6 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content_header')
+<a href="{{ route('products.export') }}" class="btn btn-info">Export Product</a>
 <h1>List Produk</h1>
 @stop
 
@@ -27,7 +28,7 @@
                     <th>Price</th>
                     <th>Categories</th>
                     <th>variant</th>
-                    <th>code</th>
+                    {{-- <th>code</th> --}}
                     <th>Action</th>
 
                 </tr>
@@ -53,13 +54,13 @@
                         @endforeach
                     </td>
                     <td>{{$product->type}}</td>
-                    <td>
-                        {!! DNS1D::getBarcodeHTML('dwqdqw', "C128",1.4,22) !!}
+                    {{-- <td>
+                        {!! DNS1D::getBarcodeHTML('dwqdqw', "C128",1.4,22) !!} --}}
 
 {{--                    @foreach($product->tags as $tag)--}}
 {{--                        {{$tag->name}},--}}
 {{--                        @endforeach--}}
-{{--                    </td>--}}
+                   {{-- </td> --}}
                     <td>
                         <div class="btn-group">
 {{--                            <a href="{{route('printLabel',[$product->type,$product->id])}}" class="btn btn-info">--}}
@@ -68,14 +69,21 @@
 {{--                            <button type="button" class="btn btn-info">--}}
 {{--                                <i class="fas fa-image"></i>--}}
 {{--                            </button>--}}
-                            <a href="{{route('products.edit',$product->id)}}" type="button" class="btn btn-warning">
-                                <i class="fas fa-edit"></i>
+                            <a href="{{route('products.edit',$product->id)}}">
+                                <button  type="button" class="btn btn-warning mr-2">
+                                    <i class="fas fa-edit"></i>
+                                </button>   
                             </a>
                             <a href="{{route('products.destroys',$product->id)}}" onclick="return confirm(`Are you sure?`)">
                                 <button type="button" class="btn btn-danger">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </a>
+                            {{-- <a href="{{route('products.purchase',$product->id)}}">
+                                <button type="button" class="btn btn-success ml-2">
+                                    <i class="fas fa-x"></i>
+                                </button>
+                            </a> --}}
                         </div>
                     </td>
 

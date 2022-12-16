@@ -63,6 +63,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/printLabel/{type}/{id}', [\App\Http\Controllers\HomeController::class, 'printLabel'])->name('printLabel');
     Route::get('/transaction', [\App\Http\Controllers\HomeController::class, 'transaction'])->name('transaction');
 
+    
+
     //Route::group(['prefix'=>'products','as'=>'products.','middleware'=>'auth'], function(){
     Route::group(['prefix' => 'products', 'as' => 'products.', 'middleware' => 'auth'], function () {
         Route::get('/import', [App\Http\Controllers\ProductController::class, 'import'])->name('import');
@@ -79,7 +81,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/actionLabel/{id}/{name}/{price}', [App\Http\Controllers\ProductController::class, 'actionLabel'])->name('actionLabel');
         Route::post('/labelPrint', [App\Http\Controllers\ProductController::class, 'labelPrint'])->name('labelPrint');
         Route::get('/clear/label', [App\Http\Controllers\ProductController::class, 'clearLabel'])->name('clear.label');
+        Route::get('/export', [App\Http\Controllers\ProductController::class, 'export'])->name('export');
 
+        Route::get('/purchase', [App\Http\Controllers\ProductController::class, 'purchase'])->name('purchase');
+        Route::post('/updatepurchase', [App\Http\Controllers\ProductController::class, 'updatepurchase'])->name('updatepurchase');
+        Route::get('/listpurchases', [App\Http\Controllers\ProductController::class, 'listpurchases'])->name('listpurchases');
+        // Route::get('/listpurchases/{filter}', [App\Http\Controllers\HomeController::class, 'listpurchases'])->name('listpurchasesFilter');
         // Route::get('/', [App\Http\Controllers\ProductController::class, 'index'])->name('index');
     });
 
@@ -96,12 +103,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [App\Http\Controllers\CategoryController::class, 'index'])->name('index');
     });
     Route::get('expense/destroys/{id}', [App\Http\Controllers\ExpenseController::class, 'destroy'])->name('expense.destroys');
-    Route::resource('expense',\App\Http\Controllers\ExpenseController::class);
+    Route::resource('expense', \App\Http\Controllers\ExpenseController::class);
 
     Route::get('discount/destroys/{id}', [App\Http\Controllers\DiscountController::class, 'destroy'])->name('discount.destroys');
-    Route::resource('discount',\App\Http\Controllers\DiscountController::class);
+    Route::resource('discount', \App\Http\Controllers\DiscountController::class);
 
     Route::get('users/destroys/{id}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroys');
-    Route::resource('users',\App\Http\Controllers\UserController::class);
+    Route::resource('users', \App\Http\Controllers\UserController::class);
 });
-

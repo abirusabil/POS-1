@@ -35,8 +35,8 @@
                                         <div class="form-group">
                                             <label for="inputStatus">Type</label>
                                             <select name="type" class="form-control custom-select" name="drpDown" id="drpDown" readonly>
-                                                <option value="1">Single product</option>
                                                 <option value="2">Variable product</option>
+                                                <option value="1">Single product</option>                                               
                                             </select>
                                         </div>
                                     @endif
@@ -44,7 +44,7 @@
                                     <div class="form-group">
                                         <label for="inputName">Image</label>
                                         {{--                            <input>--}}
-                                        <input type="file" name="image[]" multiple="multiple" id="inputName" class="form-control">
+                                        <input type="file" name="image" multiple="multiple" id="inputName" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">Name</label>
@@ -75,11 +75,11 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">price modal</label>
-                                        <input type="text" name="price_modal" value="{{($data != null) ? $sql->price_modal : ''}}" id="inputName" class="form-control">
+                                        <input type="text" name="price_modal" value="{{($data != null) ? $sql->price_modal : ''}}" id="price_modal" class="form-control">
                                     </div>
-                                        <div class="form-group">
-                                        <label for="inputName">price sale</label>
-                                        <input type="text" name="price" value="{{($data != null) ? $data->regular_price : ''}} " id="inputName" class="form-control">
+                                    <div class="form-group">
+                                        <label for="sale">price sale</label>
+                                        <input type="text" name="price_sale" value="{{($data != null) ? $sql->price_sale : ''}} " id="price_sale" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="inputStatus">Categories</label>
@@ -104,40 +104,42 @@
 
                             <div class="col-md-6">
                                 <div class="card-body">
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <label for="inputName">quantity</label>
                                         <input type="text" name="quantity" value="{{($data != null) ? $data->stock_quantity : ''}} " id="inputName" class="form-control">
-                                    </div>
-                                    <div class="form-group" name="ggg" id="ggg">
-                                        <label for="inputName">Combo product</label>
+                                    </div> --}}
+                                    
+                                    {{-- <input type="hidden" name="quantity" value="{{($data != null) ? $data->stock_quantity : ''}} " id="inputName" class="form-control"> --}}
+                                    <div class="form-group" name="ggg" id="ggg" style="display:{{ ($data != null && $data->type === "simple") ? "none" : ''}}">
+                                        <label for="inputName">Chose Size</label>
                                         <div>
-{{--                                            <p>Text2</p>--}}
-                                                <table class="table table-condensed">
-                                                    <thead>
-                                                    <tr>
-                                                        <th width="300px">Poduct name</th>
-                                                        <th width="100px">Quantity</th>
-                                                        <th width="80px"></th>
-                                                    </tr>
-                                                    </thead>
-                                                    <!--elemet sebagai target append-->
-                                                    <tbody id="itemlist">
-                                                    <tr>
-                                                        <td><input name="jenis_input[0]" class="form-control" /></td>
-                                                        <td><input name="jumlah_input[0]" class="form-control" /></td>
-                                                        <td></td>
-                                                    </tr>
-                                                    </tbody>
-                                                    <tfoot>
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td>
-                                                            <a class="btn btn-small btn-default" onclick="additem(); return false">+<i class="glyphicon glyphicon-plus"></i></a>
-                                                        </td>
-                                                    </tr>
-                                                    </tfoot>
-                                                </table>
+                                            <ul class="list-group">
+                                               
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('S',$attributes) != "" ) ? true : false) value="S">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">S</label>
+                                                </li>
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('M',$attributes) !=  "") ? true : false) value="M">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">M</label>
+                                                </li>
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('L',$attributes) !=  "") ? true : false ) value="L">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">L</label>
+                                                </li>
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('XL',$attributes) != "" ) ? true : false ) value="XL">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">XL</label>
+                                                </li>
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('XXL',$attributes) != "" ) ? true : false ) value="XXL">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">XXL</label>
+                                                </li>
+                                                <li class="list-group-item mt-2 border rounded p-1">
+                                                    <input class="form-check-input ml-1" type="checkbox" name=size[] id="size" @checked(($type && array_search('XXXL',$attributes) != "" ) ? true : false) value="XXXL">
+                                                    <label class="form-check-label ml-4" for="flexSwitchCheckDefault">XXXL</label>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
 
@@ -150,9 +152,9 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-12">
+                <div class="col-12 mb-3 ml-2">
                     <a href="#" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-success float-right"> Save </button>
+                    <button type="submit" class="btn btn-success float-right ml-2"> Save </button>
                 </div>
             </div>
         </form>
@@ -181,26 +183,42 @@
             var row = document.createElement('tr');
             var jenis = document.createElement('td');
             var jumlah = document.createElement('td');
+            // var size = document.createElement('td');
             var aksi = document.createElement('td');
+
+            jenis.setAttribute('class', 'px-1');
+            // jumlah.setAttribute('class', 'px-1');
+
+            jenis.innerHTML = `
+                <select name="jenis_input[${i}]" class="form-control form-select-lg px-1" aria-label="Default select example">
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                    <option value="XXXL">XXXL</option>
+                </select>
+            `;
 
 //                meng append element
             itemlist.appendChild(row);
             row.appendChild(jenis);
-            row.appendChild(jumlah);
+            // row.appendChild(jumlah);
+            // row.appendChild(size);
             row.appendChild(aksi);
 
 //                membuat element input
-            var jenis_input = document.createElement('input');
-            jenis_input.setAttribute('name', 'jenis_input[' + i + ']');
-            jenis_input.setAttribute('class', 'form-control');
+            // var jenis_input = document.createElement('input');
+            // jenis_input.setAttribute('name', 'jenis_input[' + i + ']');
+            // jenis_input.setAttribute('class', 'form-control px-1');
 
             var jumlah_input = document.createElement('input');
             jumlah_input.setAttribute('name', 'jumlah_input[' + i + ']');
-            jumlah_input.setAttribute('class', 'form-control');
+            jumlah_input.setAttribute('class', 'form-control px-1');
 
             var hapus = document.createElement('span');
 
-            jenis.appendChild(jenis_input);
+            // jenis.appendChild(jenis_input);
             jumlah.appendChild(jumlah_input);
             aksi.appendChild(hapus);
 
@@ -215,7 +233,7 @@
 
 
         $(function () {
-            $('#ggg').hide();
+            
             $('#drpDown').change(function() {
                 // $('p').hide();
                 var a = $(this).val();
